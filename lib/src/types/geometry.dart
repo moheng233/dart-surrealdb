@@ -1,6 +1,6 @@
 /// Represents a geometric point.
 class GeometryPoint {
-  /// The coordinates [longitude, latitude]
+  /// The coordinates in the format [longitude, latitude]
   final List<double> coordinates;
 
   /// Creates a new GeometryPoint with the given coordinates.
