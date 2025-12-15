@@ -72,3 +72,8 @@ export 'src/errors/errors.dart';
 export 'src/engine/engine.dart';
 export 'src/engine/websocket_engine.dart';
 export 'src/engine/http_engine.dart';
+export 'src/engine/websocket_cbor_engine.dart';
+export 'src/engine/http_cbor_engine.dart';
+
+// CBOR (for advanced usage)
+export 'src/cbor/surreal_cbor.dart';

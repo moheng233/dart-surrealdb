@@ -12,6 +12,7 @@ SurrealDB SDK for Dart - A comprehensive Dart implementation of the SurrealDB cl
 - 🕸️ **Graph Relations**: Create and query graph relationships
 - 🎯 **Custom Types**: RecordId, Table, Duration, Geometry, UUID, and more
 - 🛠️ **Error Handling**: Comprehensive error classes for different scenarios
+- ⚙️ **CBOR Protocol**: Optional binary encoding for improved performance and efficiency
 
 ## Installation
 
@@ -82,6 +83,28 @@ await db.connect('wss://cloud.surrealdb.com/rpc'); // Secure WebSocket
 await db.connect('http://localhost:8000');
 await db.connect('https://cloud.surrealdb.com'); // Secure HTTP
 ```
+
+### CBOR Protocol (Binary Encoding)
+
+For improved performance and reduced bandwidth usage, enable CBOR encoding:
+
+```dart
+// Create instance with CBOR enabled
+final db = Surreal(const SurrealOptions(useCbor: true));
+await db.connect('ws://localhost:8000/rpc');
+
+// All RPC calls will now use efficient CBOR binary encoding
+// Benefits:
+// - Smaller message sizes (reduced bandwidth)
+// - Faster serialization/deserialization
+// - Full support for SurrealDB custom types
+```
+
+CBOR is particularly beneficial for:
+- Applications with large data transfers
+- High-frequency operations
+- Limited bandwidth environments
+- Embedded systems or mobile apps
 
 ### Authentication
 

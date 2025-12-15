@@ -1,6 +1,8 @@
 import '../engine/engine.dart';
 import '../engine/websocket_engine.dart';
 import '../engine/http_engine.dart';
+import '../engine/websocket_cbor_engine.dart';
+import '../engine/http_cbor_engine.dart';
 import '../errors/errors.dart';
 import 'queryable.dart';
 
@@ -8,8 +10,14 @@ import 'queryable.dart';
 class SurrealOptions {
   /// Custom engine to use (optional)
   final Engine? engine;
+  
+  /// Whether to use CBOR encoding (default: false)
+  final bool useCbor;
 
-  const SurrealOptions({this.engine});
+  const SurrealOptions({
+    this.engine,
+    this.useCbor = false,
+  });
 }
 
 /// Main entry point for the SurrealDB SDK.
@@ -28,14 +36,22 @@ class SurrealOptions {
 /// 
 /// final people = await db.select<List>(Table('person'));
 /// ```
+/// 
+/// Example with CBOR:
+/// ```dart
+/// final db = Surreal(SurrealOptions(useCbor: true));
+/// await db.connect('ws://localhost:8000/rpc');
+/// ```
 class Surreal extends Queryable {
   final Engine? _customEngine;
+  final bool _useCbor;
 
   /// Creates a new Surreal instance.
   /// 
-  /// [options] can specify a custom engine.
+  /// [options] can specify a custom engine or enable CBOR encoding.
   Surreal([SurrealOptions? options])
       : _customEngine = options?.engine,
+        _useCbor = options?.useCbor ?? false,
         super(options?.engine ?? WebSocketEngine());
 
   /// Connects to a SurrealDB instance at the specified URL.
@@ -43,6 +59,8 @@ class Surreal extends Queryable {
   /// Supports the following protocols:
   /// - `ws://` or `wss://` for WebSocket connections
   /// - `http://` or `https://` for HTTP connections
+  /// 
+  /// If CBOR is enabled, uses CBOR-enabled engines for efficient binary encoding.
   /// 
   /// Example:
   /// ```dart
@@ -56,12 +74,12 @@ class Surreal extends Queryable {
         return;
       }
 
-      // Otherwise, create appropriate engine based on URL
+      // Otherwise, create appropriate engine based on URL and CBOR setting
       Engine newEngine;
       if (url.startsWith('ws://') || url.startsWith('wss://')) {
-        newEngine = WebSocketEngine();
+        newEngine = _useCbor ? WebSocketCborEngine() : WebSocketEngine();
       } else if (url.startsWith('http://') || url.startsWith('https://')) {
-        newEngine = HttpEngine();
+        newEngine = _useCbor ? HttpCborEngine() : HttpEngine();
       } else {
         throw ArgumentError(
           'Unsupported URL scheme. Use ws://, wss://, http://, or https://',
@@ -98,4 +116,7 @@ class Surreal extends Queryable {
 
   /// Returns the connection URL.
   String? get url => engine.url;
+  
+  /// Whether CBOR encoding is enabled.
+  bool get useCbor => _useCbor;
 }
