@@ -1,0 +1,16 @@
+.dart_tool/
+.packages
+.pub/
+build/
+pubspec.lock
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Test
+coverage/
+.test_coverage.dart
