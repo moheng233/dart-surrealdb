@@ -1,4 +1,3 @@
-import '../engine/engine.dart';
 import '../errors/errors.dart';
 import '../types/record_id.dart';
 import '../types/table.dart';
@@ -6,9 +5,7 @@ import 'session.dart';
 
 /// Provides the query interface for database operations.
 class Queryable extends Session {
-  final Engine _engine;
-
-  Queryable(this._engine) : super(_engine);
+  Queryable(super.engine);
 
   /// Creates a new record in the specified table or resource.
   /// 
@@ -133,9 +130,6 @@ class Queryable extends Session {
       throw QueryError('Relate failed', e);
     }
   }
-
-  /// Gets the underlying engine.
-  Engine get engine => _engine;
 
   String _resourceToString(dynamic resource) {
     if (resource is String) {

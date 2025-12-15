@@ -107,6 +107,9 @@ class HttpEngine implements Engine {
           throw RpcError(message, code);
         }
         
+        // Update internal state for use/authenticate methods
+        _updateInternalState(method, params);
+        
         return data['result'];
       } else {
         throw RpcError(
@@ -122,14 +125,17 @@ class HttpEngine implements Engine {
     }
   }
 
-  /// Sets the authentication token for subsequent requests
-  void setToken(String? token) {
-    _token = token;
-  }
-
-  /// Sets the namespace and database for subsequent requests
-  void setNamespaceDatabase(String? namespace, String? database) {
-    _namespace = namespace;
-    _database = database;
+  void _updateInternalState(String method, List<dynamic> params) {
+    // Update internal state based on method calls
+    if (method == 'authenticate' && params.isNotEmpty) {
+      _token = params[0] as String?;
+    } else if (method == 'use' && params.length >= 2) {
+      _namespace = params[0] as String?;
+      _database = params[1] as String?;
+    } else if (method == 'signin' || method == 'signup') {
+      // Token will be in the response, handled by the caller
+    } else if (method == 'invalidate') {
+      _token = null;
+    }
   }
 }

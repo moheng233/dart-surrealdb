@@ -44,11 +44,18 @@ class WebSocketEngine implements Engine {
         onDone: _handleDone,
       );
 
-      // Wait a bit to ensure connection is established
-      await Future.delayed(const Duration(milliseconds: 100));
-      
-      _isConnected = true;
+      // Wait for first connection state by sending a ping
+      try {
+        await rpc('ping', []).timeout(const Duration(seconds: 5));
+        _isConnected = true;
+      } catch (e) {
+        await disconnect();
+        throw ConnectionError('Failed to establish connection', e);
+      }
     } catch (e) {
+      if (e is ConnectionError) {
+        rethrow;
+      }
       throw ConnectionError('Failed to connect to $url', e);
     }
   }

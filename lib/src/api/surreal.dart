@@ -30,14 +30,12 @@ class SurrealOptions {
 /// ```
 class Surreal extends Queryable {
   final Engine? _customEngine;
-  Engine _currentEngine;
 
   /// Creates a new Surreal instance.
   /// 
   /// [options] can specify a custom engine.
   Surreal([SurrealOptions? options])
       : _customEngine = options?.engine,
-        _currentEngine = options?.engine ?? WebSocketEngine(),
         super(options?.engine ?? WebSocketEngine());
 
   /// Connects to a SurrealDB instance at the specified URL.
@@ -52,27 +50,32 @@ class Surreal extends Queryable {
   /// ```
   Future<void> connect(String url) async {
     try {
-      Engine engineToUse;
-
+      // If a custom engine was provided, use it
       if (_customEngine != null) {
-        engineToUse = _customEngine!;
-      } else {
-        // Determine engine based on URL
-        if (url.startsWith('ws://') || url.startsWith('wss://')) {
-          engineToUse = WebSocketEngine();
-        } else if (url.startsWith('http://') || url.startsWith('https://')) {
-          engineToUse = HttpEngine();
-        } else {
-          throw ArgumentError(
-            'Unsupported URL scheme. Use ws://, wss://, http://, or https://',
-          );
-        }
-        
-        // Replace the current engine
-        _currentEngine = engineToUse;
+        await _customEngine!.connect(url);
+        return;
       }
 
-      await engineToUse.connect(url);
+      // Otherwise, create appropriate engine based on URL
+      Engine newEngine;
+      if (url.startsWith('ws://') || url.startsWith('wss://')) {
+        newEngine = WebSocketEngine();
+      } else if (url.startsWith('http://') || url.startsWith('https://')) {
+        newEngine = HttpEngine();
+      } else {
+        throw ArgumentError(
+          'Unsupported URL scheme. Use ws://, wss://, http://, or https://',
+        );
+      }
+
+      // Disconnect old engine if connected
+      if (engine.isConnected) {
+        await engine.disconnect();
+      }
+
+      // Replace the engine
+      setEngine(newEngine);
+      await newEngine.connect(url);
     } catch (e) {
       if (e is ConnectionError) {
         rethrow;
@@ -91,11 +94,8 @@ class Surreal extends Queryable {
   }
 
   /// Whether the client is currently connected.
-  bool get isConnected => _currentEngine.isConnected;
+  bool get isConnected => engine.isConnected;
 
   /// Returns the connection URL.
-  String? get url => _currentEngine.url;
-  
-  @override
-  Engine get engine => _currentEngine;
+  String? get url => engine.url;
 }

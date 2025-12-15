@@ -1,6 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'package:surrealdb/surrealdb.dart';
 
 /// Example demonstrating basic usage of the SurrealDB Dart SDK
+/// Note: This example uses print statements for demonstration purposes
 void main() async {
   // Create a new SurrealDB instance
   final db = Surreal();

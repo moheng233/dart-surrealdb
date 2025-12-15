@@ -1,12 +1,22 @@
 import '../engine/engine.dart';
 import '../errors/errors.dart';
+import 'package:meta/meta.dart';
 
 /// Handles authentication and session state management.
 class Session {
-  final Engine _engine;
+  Engine _engine;
   String? _token;
 
   Session(this._engine);
+
+  /// Gets the underlying engine.
+  Engine get engine => _engine;
+
+  /// Internal method to update the engine (used by subclasses)
+  @protected
+  void setEngine(Engine engine) {
+    _engine = engine;
+  }
 
   /// Authenticates with username and password.
   /// 
